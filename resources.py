@@ -20,6 +20,7 @@ def verify_password(username, password):
 parser = reqparse.RequestParser()
 parser.add_argument('username', type=str, required=True)
 parser.add_argument('password', type=str, required=True)
+parser.add_argument('never_dies', type=bool, required=False)
 
 class UserRegistration(Resource):
     def post(self):
@@ -40,27 +41,34 @@ class UserLogin(Resource):
         if not user:
             return {'message': 'User does not exist'}, 400
         if user.check_password(data['password']):
-            return {'user' : user.username, 'public_id': user.public_id, 'token': user.token }, 200
+            return {'user' : user.username, 'public_id': user.public_id, 'token': user.token}, 200
         return {'message': 'Wrong password'}, 401
 
-class TokenGenerate(Resource):
+class GetCurrentToken(Resource):
     @auth.login_required
     def get(self, public_id):
         data = parser.parse_args()
-        user = User.query.filter_by(username=data['username']).first()
-        user = User(**data)
+        user = User.query.filter_by(username = data['username']).first()
         if not user.token:
-            user.generate_token(data['public_id'])
-            return {'token': user.token}
+            return {'message': 'Token does not exist'}, 400
+        return {'token': user.token, "never_dies": user.never_dies }, 200
+class TokenGenerate(Resource):
+    @auth.login_required
+    def post(self, public_id):
+        data = parser.parse_args()
+        user = User.query.filter_by(username=data['username']).first()
+        if user.token:
+            return {'message': 'Token already exists'}, 400
+        user.generate_token(public_id, never_dies = data['never_dies'])
         db.session.commit()
-        return {'message': 'Token already exists'}
+        return {'token': user.token}, 201
 
 class RefreshToken(Resource):
     @auth.login_required
     def get(self, public_id):
         data = parser.parse_args()
         user = User.query.filter_by(username=data['username']).first()
-        user.generate_token(public_id)
+        user.generate_token(public_id, never_dies = data['never_dies'])
         db.session.commit()
         return {'token': user.token}
 
