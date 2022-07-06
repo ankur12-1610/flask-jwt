@@ -185,8 +185,7 @@ https://github.com/cryptoadvance/specter-desktop/pull/1785
 
 >Demo of the implemented PoC:
 
-https://user-images.githubusercontent.com/76884959/177496521-b6d4755b-ef09-484a-9b3e-20c573006980.mp4
-
+<img alt="demo" src="https://cdn.hashnode.com/res/hashnode/image/upload/v1656855198573/jZ6J6jrdX.gif" height="480" class="align: left" />
 
 **Future milestones**
 
